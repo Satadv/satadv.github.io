@@ -232,17 +232,23 @@
     nameEl.appendChild(s);
   });
 
-  /* music: starts right away if the browser allows it,
-     otherwise it starts the first time the visitor clicks, taps, scrolls or presses a key */
+  /* music: browsers only allow sound after a real click, tap or key press,
+     so it tries right away, then again on the very first one of those */
   const music = document.getElementById("music");
   music.volume = 0.4;
+  const UNLOCK = ["pointerdown", "pointerup", "touchend", "click", "keydown"];
+  let started = false;
   function startMusic() {
-    music.play().then(() => {
-      ["click", "touchstart", "keydown", "scroll", "mousemove"].forEach(e => removeEventListener(e, startMusic));
+    if (started) return;
+    const p = music.play();
+    if (p) p.then(() => {
+      started = true;
+      UNLOCK.forEach(e => removeEventListener(e, startMusic, true));
     }).catch(() => {});
   }
-  ["click", "touchstart", "keydown", "scroll", "mousemove"].forEach(e => addEventListener(e, startMusic));
+  UNLOCK.forEach(e => addEventListener(e, startMusic, true));
   startMusic();
+  music.addEventListener("canplay", startMusic, { once: true });
 
   /* floating particles */
   const cv = document.getElementById("particles");
