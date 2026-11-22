@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sata-Emu</title>
+<link rel="icon" href="logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0b0c;
+    --card: rgba(22, 22, 24, 0.75);
+    --border: rgba(255, 255, 255, 0.08);
+    --text: #f2f2f2;
+    --muted: #7a7a80;
+    --accent: #8f7bff;
+    --accent2: #4fd1ff;
+    --online: #3ddc84;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: "JetBrains Mono", monospace;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #particles { position: fixed; inset: 0; z-index: 0; }
+  .scanlines {
+    position: fixed; inset: 0; z-index: 1; pointer-events: none;
+    background: repeating-linear-gradient(to bottom, rgba(255,255,255,0.025) 0 1px, transparent 1px 3px);
+    animation: scan 8s linear infinite;
+  }
+  @keyframes scan { to { background-position: 0 300px; } }
+  .vignette {
+    position: fixed; inset: 0; z-index: 1; pointer-events: none;
+    background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.85) 100%);
+  }
+  .glow {
+    position: fixed; width: 600px; height: 600px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(143,123,255,0.18), transparent 65%);
+    z-index: 0; pointer-events: none;
+    animation: drift 14s ease-in-out infinite alternate;
+  }
+  @keyframes drift {
+    0% { transform: translate(-30%, -20%); }
+    100% { transform: translate(30%, 20%); }
+  }
+
+  main {
+    position: relative; z-index: 2;
+    display: flex; flex-direction: column; align-items: center; gap: 26px;
+    width: min(380px, 90vw);
+    opacity: 0;
+  }
+  main.show { animation: rise 1s cubic-bezier(.2,.8,.2,1) forwards; }
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(30px) scale(.97); filter: blur(6px); }
+    to   { opacity: 1; transform: none; filter: none; }
+  }
+
+  .header { display: flex; align-items: center; gap: 18px; }
+
+  .logo-wrap {
+    position: relative; width: 96px; height: 96px; flex-shrink: 0;
+    animation: float 5s ease-in-out infinite;
+  }
+  @keyframes float { 50% { transform: translateY(-8px); } }
+  .logo-wrap::before {
+    content: ""; position: absolute; inset: -4px; border-radius: 50%;
+    background: conic-gradient(from 0deg, var(--accent), var(--accent2), transparent 40%, var(--accent));
+    animation: spin 3s linear infinite;
+    filter: blur(2px);
+  }
+  .logo-wrap::after {
+    content: ""; position: absolute; inset: -18px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(143,123,255,.35), transparent 70%);
+    animation: pulse 2.5s ease-in-out infinite;
+    z-index: -1;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes pulse { 50% { opacity: .4; transform: scale(1.12); } }
+  .logo-wrap img {
+    position: relative; width: 100%; height: 100%; border-radius: 50%;
+    object-fit: cover; border: 3px solid var(--bg); background: #111;
+  }
+
+  .name {
+    font-family: "Anton", sans-serif;
+    font-size: clamp(38px, 11vw, 56px);
+    letter-spacing: 1px;
+    line-height: 1;
+    position: relative;
+    display: flex;
+    transform: rotate(-3deg) skewX(-4deg);
+  }
+  .name .ch {
+    display: inline-block;
+    opacity: 0;
+    background: linear-gradient(180deg, #fff 30%, #cfcfe6 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    text-shadow: 0 0 18px rgba(143,123,255,.25);
+  }
+  main.show .name .ch {
+    animation: drop .6s cubic-bezier(.3,1.6,.5,1) forwards, wave 3s ease-in-out infinite;
+    animation-delay: calc(var(--i) * 70ms + 300ms), calc(var(--i) * 120ms + 1.5s);
+  }
+  @keyframes drop {
+    from { opacity: 0; transform: translateY(-40px) rotate(-12deg); }
+    to   { opacity: 1; transform: none; }
+  }
+  @keyframes wave { 0%, 100% { translate: 0 0; } 50% { translate: 0 -5px; } }
+
+  /* glitch layers */
+  .name::before, .name::after {
+    content: attr(data-text);
+    position: absolute; inset: 0;
+    font: inherit; letter-spacing: inherit;
+    opacity: 0; pointer-events: none;
+  }
+  .name::before { color: var(--accent2); }
+  .name::after  { color: #ff4fa3; }
+  main.show .name::before { animation: glitch1 4s infinite 2s; }
+  main.show .name::after  { animation: glitch2 4s infinite 2s; }
+  @keyframes glitch1 {
+    0%, 90%, 100% { opacity: 0; transform: none; }
+    91% { opacity: .8; transform: translate(-3px, 1px); clip-path: inset(10% 0 55% 0); }
+    93% { opacity: .8; transform: translate(3px, -1px); clip-path: inset(60% 0 10% 0); }
+    95% { opacity: 0; }
+  }
+  @keyframes glitch2 {
+    0%, 91%, 100% { opacity: 0; transform: none; }
+    92% { opacity: .8; transform: translate(3px, 0); clip-path: inset(40% 0 30% 0); }
+    94% { opacity: .8; transform: translate(-2px, 1px); clip-path: inset(5% 0 75% 0); }
+    96% { opacity: 0; }
+  }
+
+  .status {
+    width: 100%;
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 18px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    backdrop-filter: blur(8px);
+    position: relative; overflow: hidden;
+    opacity: 0;
+  }
+  .status { opacity: 1; }
+  @keyframes blink { 50% { opacity: .25; } }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+  .dot {
+    width: 10px; height: 10px; border-radius: 50%; background: var(--online); flex-shrink: 0;
+  }
+  .status-label { font-size: 10px; letter-spacing: 3px; color: var(--muted); text-transform: uppercase; }
+  .status-text { font-size: 13px; font-weight: 700; letter-spacing: 1px; min-height: 1.2em; }
+
+  .divider {
+    display: flex; align-items: center; gap: 12px; width: 100%;
+    font-size: 9px; letter-spacing: 4px; color: #555; text-transform: uppercase;
+    opacity: 0;
+  }
+  main.show .divider { animation: fadeUp .7s ease forwards 1.4s; }
+  .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="particles"></canvas>
+<div class="glow"></div>
+<div class="scanlines"></div>
+<div class="vignette"></div>
+
+<main id="main" class="show">
+  <div class="header">
+    <div class="logo-wrap">
+      <img src="logo.png" alt="Sata-Emu logo"
+           onerror="this.onerror=null;this.src='https://media.discordapp.net/attachments/1573947758342184960/1573947801979592835/3383c8933de00e467128e038d13c07cc.jpg?ex=6b03dc9e&is=6b028b1e&hm=15881ac7bfcac84da665415cccc412315165c05f49c9594904771b786a120586&format=webp'">
+    </div>
+    <h1 class="name" id="name" data-text="SATA-EMU"></h1>
+  </div>
+
+  <div class="divider">status</div>
+
+  <div class="status">
+    <div class="dot"></div>
+    <div>
+      <div class="status-label">currently</div>
+      <div class="status-text"><span id="status">Developing</span></div>
+    </div>
+  </div>
+</main>
+
+<audio id="music" src="music.mp3" loop preload="auto"></audio>
+
+<script>
+  const nameEl = document.getElementById("name");
+  [...nameEl.dataset.text].forEach((c, i) => {
+    const s = document.createElement("span");
+    s.className = "ch";
+    s.style.setProperty("--i", i);
+    s.textContent = c;
+    nameEl.appendChild(s);
+  });
+
+  const music = document.getElementById("music");
+  music.volume = 0.4;
+  function startMusic() {
+    music.play().then(() => {
+      ["click", "touchstart", "keydown", "scroll", "mousemove"].forEach(e => removeEventListener(e, startMusic));
+    }).catch(() => {});
+  }
+  ["click", "touchstart", "keydown", "scroll", "mousemove"].forEach(e => addEventListener(e, startMusic));
+  startMusic();
+
+  const cv = document.getElementById("particles");
+  const ctx = cv.getContext("2d");
+  let W, H, pts = [];
+  function resize() {
+    W = cv.width = innerWidth; H = cv.height = innerHeight;
+    pts = Array.from({ length: Math.min(90, Math.floor(W * H / 14000)) }, () => ({
+      x: Math.random() * W, y: Math.random() * H,
+      r: Math.random() * 1.6 + .3,
+      vx: (Math.random() - .5) * .25, vy: -Math.random() * .4 - .1,
+      a: Math.random() * .6 + .2
+    }));
+  }
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    for (const p of pts) {
+      p.x += p.vx; p.y += p.vy;
+      if (p.y < -5) { p.y = H + 5; p.x = Math.random() * W; }
+      if (p.x < -5) p.x = W + 5; if (p.x > W + 5) p.x = -5;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(170,160,255,${p.a})`; ctx.fill();
+    }
+    requestAnimationFrame(draw);
+  }
+  addEventListener("resize", resize);
+  resize(); draw();
+</script>
+</body>
+</html>
