@@ -3,268 +3,215 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sata-Emu</title>
+<title>sata-emu</title>
 <link rel="icon" href="logo.png">
-<link rel="icon" href="logo.jpg">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0b0b0c;
-    --card: rgba(22, 22, 24, 0.75);
-    --border: rgba(255, 255, 255, 0.08);
-    --text: #f2f2f2;
-    --muted: #7a7a80;
-    --accent: #8f7bff;
-    --accent2: #4fd1ff;
-    --online: #3ddc84;
-  }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
   body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: "JetBrains Mono", monospace;
-    overflow-x: hidden;
-    min-height: 100vh;
+    margin: 0;
+    background: #0e0e10;
+    color: #d6d6d6;
+    font: 14px/1.6 "JetBrains Mono", Consolas, monospace;
   }
-  ::-webkit-scrollbar { width: 8px; }
-  ::-webkit-scrollbar-track { background: #0b0b0c; }
-  ::-webkit-scrollbar-thumb { background: #2a2a30; border-radius: 4px; }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 40px 20px 60px; }
+  a { color: #9d8cff; }
+  a:hover { color: #c2b7ff; }
+  h1, h2 { color: #fff; font-weight: 700; }
+  h1 { font-size: 22px; margin: 0; }
+  h2 { font-size: 15px; margin: 40px 0 10px; padding-bottom: 6px; border-bottom: 1px solid #222; }
+  p { margin: 8px 0; }
+  .muted { color: #777; }
+  code { background: #19191c; padding: 1px 4px; border-radius: 3px; font-size: 13px; }
 
-  /* ---------- background layers ---------- */
-  #particles { position: fixed; inset: 0; z-index: 0; }
-  .scanlines {
-    position: fixed; inset: 0; z-index: 1; pointer-events: none;
-    background: repeating-linear-gradient(to bottom, rgba(255,255,255,0.025) 0 1px, transparent 1px 3px);
-    animation: scan 8s linear infinite;
-  }
-  @keyframes scan { to { background-position: 0 300px; } }
-  .vignette {
-    position: fixed; inset: 0; z-index: 1; pointer-events: none;
-    background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.85) 100%);
-  }
-  .glow {
-    position: fixed; width: 600px; height: 600px; border-radius: 50%;
-    background: radial-gradient(circle, rgba(143,123,255,0.18), transparent 65%);
-    z-index: 0; pointer-events: none;
-    animation: drift 14s ease-in-out infinite alternate;
-  }
-  @keyframes drift {
-    0% { transform: translate(-30%, -20%); }
-    100% { transform: translate(30%, 20%); }
-  }
+  header { display: flex; align-items: center; gap: 14px; }
+  header img { width: 56px; height: 56px; border-radius: 8px; object-fit: cover; background: #19191c; }
+  header .links { margin-left: auto; font-size: 13px; }
+  header .links a { margin-left: 12px; }
 
-  /* ---------- main card ---------- */
-  main {
-    position: relative; z-index: 2;
-    display: flex; flex-direction: column; align-items: center; gap: 26px;
-    width: min(440px, 90vw);
-    margin: 0 auto;
-    padding: calc(50vh - 130px) 0 90px;
-    opacity: 0;
-  }
-  main.show { animation: rise 1s cubic-bezier(.2,.8,.2,1) forwards; }
-  @keyframes rise {
-    from { opacity: 0; transform: translateY(30px) scale(.97); filter: blur(6px); }
-    to   { opacity: 1; transform: none; filter: none; }
-  }
+  .ic { width: 14px; height: 14px; vertical-align: -2px; margin-right: 6px; flex-shrink: 0; }
+  h2 .ic { color: #9d8cff; }
+  .links a { text-decoration: none; display: inline-flex; align-items: center; padding: 3px 8px; border: 1px solid #26262a; border-radius: 4px; color: #bbb; }
+  .links a:hover { border-color: #3a3a40; color: #fff; }
+  .links .ic { margin-right: 5px; }
+  .warn { display: flex; align-items: flex-start; }
+  .warn .ic { color: #e05a52; margin-top: 3px; }
+  .sub .ic { color: #e6c34d; }
+  .stack { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .stack span { display: inline-flex; align-items: center; font-size: 12px; color: #aaa; background: #161619; border: 1px solid #222; border-radius: 4px; padding: 2px 8px; }
+  .stack .ic { width: 12px; height: 12px; margin-right: 5px; color: #9d8cff; }
+  #rellink { text-decoration: none; }
+  #musicbtn { display: inline-flex; align-items: center; }
+  #musicbtn .ic { width: 12px; height: 12px; margin-right: 5px; }
+  .status { margin-top: 18px; font-size: 13px; }
+  .status .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #3ddc84; margin-right: 6px; }
 
-  .header { display: flex; align-items: center; gap: 18px; }
+  .warn { margin-top: 18px; padding: 10px 12px; border-left: 3px solid #e05a52; background: #1a1213; font-size: 13px; }
 
-  .logo-wrap {
-    position: relative; width: 96px; height: 96px; flex-shrink: 0;
-    animation: float 5s ease-in-out infinite;
-  }
-  @keyframes float { 50% { transform: translateY(-8px); } }
-  .logo-wrap::before {
-    content: ""; position: absolute; inset: -4px; border-radius: 50%;
-    background: conic-gradient(from 0deg, var(--accent), var(--accent2), transparent 40%, var(--accent));
-    animation: spin 3s linear infinite;
-    filter: blur(2px);
-  }
-  .logo-wrap::after {
-    content: ""; position: absolute; inset: -18px; border-radius: 50%;
-    background: radial-gradient(circle, rgba(143,123,255,.35), transparent 70%);
-    animation: pulse 2.5s ease-in-out infinite;
-    z-index: -1;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  @keyframes pulse { 50% { opacity: .4; transform: scale(1.12); } }
-  .logo-wrap img {
-    position: relative; width: 100%; height: 100%; border-radius: 50%;
-    object-fit: cover; border: 3px solid var(--bg); background: #111;
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid #1f1f22; vertical-align: top; }
+  th { color: #888; font-weight: 400; }
+  td:nth-child(-n+3), th:nth-child(-n+3) { white-space: nowrap; }
+  td:last-child { width: 100%; }
+  .ingame { color: #e6c34d; }
+  .table-wrap { overflow-x: auto; }
+
+  @media (max-width: 560px) {
+    body { font-size: 13px; }
+    .wrap { padding: 24px 14px 50px; }
+    header img { width: 44px; height: 44px; }
+    h1 { font-size: 19px; }
+    th, td { padding: 6px 5px; }
+    table { font-size: 12px; }
   }
 
-  /* ---------- animated name ---------- */
-  .name {
-    font-family: "Anton", sans-serif;
-    font-size: clamp(38px, 11vw, 56px);
-    letter-spacing: 1px;
-    line-height: 1;
-    position: relative;
-    display: flex;
-    transform: rotate(-3deg) skewX(-4deg);
-  }
-  .name .ch {
-    display: inline-block;
-    opacity: 0;
-    background: linear-gradient(180deg, #fff 30%, #cfcfe6 100%);
-    -webkit-background-clip: text; background-clip: text; color: transparent;
-    text-shadow: 0 0 18px rgba(143,123,255,.25);
-  }
-  main.show .name .ch {
-    animation: drop .6s cubic-bezier(.3,1.6,.5,1) forwards, wave 3s ease-in-out infinite;
-    animation-delay: calc(var(--i) * 70ms + 300ms), calc(var(--i) * 120ms + 1.5s);
-  }
-  @keyframes drop {
-    from { opacity: 0; transform: translateY(-40px) rotate(-12deg); }
-    to   { opacity: 1; transform: none; }
-  }
-  @keyframes wave { 0%, 100% { translate: 0 0; } 50% { translate: 0 -5px; } }
+  .rel { margin: 18px 0 26px; }
+  .rel-head { color: #fff; }
+  .rel-head .date { color: #666; }
+  .rel-head .pre { color: #e6c34d; font-size: 12px; }
+  .rel ul { margin: 6px 0; padding-left: 18px; }
+  .rel li { margin: 2px 0; }
+  .rel .sub { color: #888; margin-top: 8px; }
+  #older { display: none; }
+  .toggle { background: none; border: 0; color: #9d8cff; font: inherit; cursor: pointer; padding: 0; text-decoration: underline; }
 
-  /* glitch layers */
-  .name::before, .name::after {
-    content: attr(data-text);
-    position: absolute; inset: 0;
-    font: inherit; letter-spacing: inherit;
-    opacity: 0; pointer-events: none;
-  }
-  .name::before { color: var(--accent2); }
-  .name::after  { color: #ff4fa3; }
-  main.show .name::before { animation: glitch1 4s infinite 2s; }
-  main.show .name::after  { animation: glitch2 4s infinite 2s; }
-  @keyframes glitch1 {
-    0%, 90%, 100% { opacity: 0; transform: none; }
-    91% { opacity: .8; transform: translate(-3px, 1px); clip-path: inset(10% 0 55% 0); }
-    93% { opacity: .8; transform: translate(3px, -1px); clip-path: inset(60% 0 10% 0); }
-    95% { opacity: 0; }
-  }
-  @keyframes glitch2 {
-    0%, 91%, 100% { opacity: 0; transform: none; }
-    92% { opacity: .8; transform: translate(3px, 0); clip-path: inset(40% 0 30% 0); }
-    94% { opacity: .8; transform: translate(-2px, 1px); clip-path: inset(5% 0 75% 0); }
-    96% { opacity: 0; }
-  }
+  .x-posts .twitter-tweet { margin: 10px 0 !important; }
 
-  /* ---------- status ---------- */
-  .status {
-    width: 100%;
-    display: flex; align-items: center; gap: 12px;
-    padding: 14px 18px;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    backdrop-filter: blur(8px);
-    position: relative; overflow: hidden;
-    opacity: 0;
-  }
-  .status { opacity: 1; }
-  @keyframes blink { 50% { opacity: .25; } }
-  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
-  .dot {
-    width: 10px; height: 10px; border-radius: 50%; background: var(--online); flex-shrink: 0;
-  }
-  .status-label { font-size: 10px; letter-spacing: 3px; color: var(--muted); text-transform: uppercase; }
-  .status-text { font-size: 13px; font-weight: 700; letter-spacing: 1px; min-height: 1.2em; }
+  footer { margin-top: 50px; font-size: 12px; color: #555; }
 
-  .divider {
-    display: flex; align-items: center; gap: 12px; width: 100%;
-    font-size: 9px; letter-spacing: 4px; color: #555; text-transform: uppercase;
-    opacity: 0;
-  }
-  main.show .divider { animation: fadeUp .7s ease forwards 1.4s; }
-  .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: var(--border); }
-
-  /* ---------- sections that appear on scroll ---------- */
-  .section { width: 100%; display: flex; flex-direction: column; gap: 14px; margin-top: 8px; }
-  .reveal { opacity: 0; transform: translateY(24px); transition: opacity .7s ease, transform .7s cubic-bezier(.2,.8,.2,1); }
-  .reveal.in { opacity: 1; transform: none; }
-  .section .divider { animation: none !important; }
-
-  /* ---------- changelog ---------- */
-  .log {
-    background: var(--card); border: 1px solid var(--border); border-radius: 10px;
-    padding: 16px 18px; backdrop-filter: blur(8px);
-    position: relative;
-  }
-  .log::before {
-    content: ""; position: absolute; left: 0; top: 14px; bottom: 14px; width: 2px;
-    background: linear-gradient(var(--accent), var(--accent2)); border-radius: 2px;
-  }
-  .log-top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 8px; }
-  .log-title { font-size: 13px; font-weight: 700; letter-spacing: 1px; }
-  .log-date { font-size: 10px; color: var(--muted); letter-spacing: 1px; white-space: nowrap; }
-  .log-tag {
-    display: inline-block; font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
-    padding: 2px 6px; border-radius: 4px; margin-right: 8px;
-    background: rgba(143,123,255,.15); color: #b9adff; vertical-align: 1px;
-  }
-  .log ul { list-style: none; display: flex; flex-direction: column; gap: 5px; }
-  .log li { font-size: 12px; color: #c9c9cf; line-height: 1.5; padding-left: 16px; position: relative; }
-  .log li::before { content: "›"; position: absolute; left: 2px; color: var(--accent); }
-
-  /* ---------- X posts ---------- */
-  .x-follow {
-    display: flex; align-items: center; justify-content: center; gap: 10px;
-    padding: 14px; border-radius: 10px; text-decoration: none; color: var(--text);
-    background: var(--card); border: 1px solid var(--border); backdrop-filter: blur(8px);
-    font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
-    transition: border-color .25s ease, transform .25s ease, background .25s ease;
-  }
-  .x-follow:hover { border-color: rgba(255,255,255,.25); transform: translateY(-2px); background: rgba(30,30,34,.85); }
-  .x-follow span { color: var(--muted); font-weight: 400; text-transform: none; letter-spacing: 1px; }
-  .x-posts { display: flex; flex-direction: column; gap: 4px; }
-  .x-posts .twitter-tweet { margin: 0 auto !important; }
-  .x-empty { font-size: 11px; color: var(--muted); text-align: center; padding: 6px 0; }
-
-  @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
-  }
+  #musicbtn { position: fixed; right: 14px; bottom: 14px; background: #19191c; color: #888; border: 1px solid #2a2a2e; border-radius: 4px; font: 12px "JetBrains Mono", monospace; padding: 4px 8px; cursor: pointer; }
+  #musicbtn:hover { color: #ddd; }
 </style>
 </head>
 <body>
+<div class="wrap">
 
-<canvas id="particles"></canvas>
-<div class="glow"></div>
-<div class="scanlines"></div>
-<div class="vignette"></div>
-
-<main id="main" class="show">
-  <div class="header">
-    <div class="logo-wrap">
-      <!-- Put your logo in the repo as logo.png or logo.jpg. The Discord link is only a backup: Discord links expire after a while. -->
-      <img id="logo" src="logo.png" alt="Sata-Emu logo">
-    </div>
-    <h1 class="name" id="name" data-text="SATA-EMU"></h1>
-  </div>
-
-  <div class="divider">status</div>
-
-  <div class="status">
-    <div class="dot"></div>
+  <header>
+    <img class="logo-img" src="logo.png" alt="">
     <div>
-      <div class="status-label">currently</div>
-      <div class="status-text"><span id="status">Developing</span></div>
+      <h1>sata-emu</h1>
+      <div class="muted">ps5 emulator for windows (wip)</div>
+    </div>
+    <div class="links">
+      <a id="ghlink" target="_blank" rel="noopener"><svg class="ic" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>github</a>
+      <a id="xlink" target="_blank" rel="noopener"><svg class="ic" viewBox="0 0 24 24" fill="currentColor"><path d="M18.9 2H22l-6.8 7.8L23 22h-6.2l-4.8-6.3L6.4 22H3.3l7.3-8.3L1 2h6.3l4.4 5.8L18.9 2zm-1.1 18h1.7L6.3 3.9H4.5L17.8 20z"/></svg>x</a>
+    </div>
+  </header>
+
+  <div class="status"><span class="dot"></span><span id="status">developing</span> <span class="muted">· latest: <span id="ver"></span></span></div>
+
+  <div class="warn">
+    <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg><span>no public builds. there's nothing to download right now, so if you see a "sata-emu download" anywhere it's fake. don't run it.</span>
+  </div>
+
+  <h2><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>about</h2>
+  <p>sata-emu runs ps5 games on pc. guest code runs natively on the cpu, the system libraries are reimplemented (hle) and the gpu side goes through vulkan.</p>
+  <p>it's a side project and it's early. most stuff is broken. updates go on github and x.</p>
+  <div class="stack">
+    <span><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3"/></svg>x86-64 native</span>
+    <span><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L2 12V2h10l8.6 8.6a2 2 0 0 1 0 2.8z"/><path d="M7 7h.01"/></svg>hle kernel</span>
+    <span><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 11h4M8 9v4M15 12h.01M18 10h.01"/><path d="M17.3 5H6.7a4 4 0 0 0-4 3.6L2 15a3 3 0 0 0 5.4 2l1.1-1.5h7l1.1 1.5A3 3 0 0 0 22 15l-.7-6.4A4 4 0 0 0 17.3 5z"/></svg>vulkan 1.3</span>
+    <span><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>windows 10/11</span>
+  </div>
+
+  <h2><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 11h4M8 9v4M15 12h.01M18 10h.01"/><path d="M17.3 5H6.7a4 4 0 0 0-4 3.6L2 15a3 3 0 0 0 5.4 2l1.1-1.5h7l1.1 1.5A3 3 0 0 0 22 15l-.7-6.4A4 4 0 0 0 17.3 5z"/></svg>compatibility</h2>
+  <div class="table-wrap">
+  <table>
+    <tr><th>game</th><th>id</th><th>status</th><th>notes</th></tr>
+    <tr><td>GTA VI</td><td>PPSA01547</td><td class="ingame">in-game</td><td>first mission is playable all the way through, 20-30 fps. crashes after it ends.</td></tr>
+  </table>
+  </div>
+
+  <h2><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="10"/></svg>changelog</h2>
+
+  <div class="rel">
+    <div class="rel-head">v0.4.2-dev <span class="date">nov 22 2026</span> <span class="pre">pre-release</span></div>
+    <p class="muted">internal preview build, not available for download.</p>
+    <ul>
+      <li>story mode loads now and the first mission can be played start to finish</li>
+      <li>fixed the gpu device lost crash when entering story mode cutscenes</li>
+      <li>vulkan: fixed swapchain recreation on window resize</li>
+      <li>shader recompiler: added <code>V_DOT2_F32_F16</code> and <code>V_PERMLANE16_B32</code> (slow path)</li>
+      <li>pfs: deferred loading for flagged chunks</li>
+      <li>audio: 8ch to 2ch downmix</li>
+      <li>input: dualsense, dualshock 4 and xbox controllers work over usb and bluetooth</li>
+    </ul>
+    <div class="sub"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2l1.9 1.9M16 2l-1.9 1.9M9 7.1V6a3 3 0 0 1 6 0v1.1"/><path d="M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6zM12 20v-9M6.5 13H3M21 13h-3.5M6 9 3 7M18 9l3-2M6 17l-3 2M18 17l3 2"/></svg>known issues</div>
+    <ul>
+      <li>crashes after the first mission ends (save / transition to free roam)</li>
+      <li>20-30 fps, stutters while shaders compile</li>
+      <li>some cutscenes have missing textures or flicker</li>
+      <li>no keyboard and mouse yet</li>
+      <li>uses a lot of ram (~10 gb)</li>
+    </ul>
+    <a id="rellink" target="_blank" rel="noopener"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>full notes on github</a>
+  </div>
+
+  <div class="rel">
+    <div class="rel-head">v0.4.1 <span class="date">nov 8 2026</span></div>
+    <ul>
+      <li>gets through the whole boot flow into the main menu now</li>
+      <li>patches get overlaid on top of <code>/app0</code></li>
+      <li>shader cache is saved to disk</li>
+      <li>hdr gets tonemapped to sdr if your monitor doesn't do hdr</li>
+      <li>save data works for user 1</li>
+      <li>known: story mode crashes with <code>VK_ERROR_DEVICE_LOST</code> on the first cutscene</li>
+    </ul>
+  </div>
+
+  <button class="toggle" id="toggle">show older</button>
+
+  <div id="older">
+    <div class="rel">
+      <div class="rel-head">v0.4.0 <span class="date">oct 25 2026</span></div>
+      <ul>
+        <li>rewrote the renderer on vulkan 1.3</li>
+        <li>new command processor (gfx ring + 8 compute queues)</li>
+        <li>shader recompiler to spir-v, around 70% of opcodes</li>
+        <li>bink video playback</li>
+        <li>perf overlay (f3) and debugger (f4)</li>
+      </ul>
+    </div>
+    <div class="rel">
+      <div class="rel-head">v0.3.0 <span class="date">oct 4 2026</span></div>
+      <ul>
+        <li>pfs mounting</li>
+        <li>first pass of the kernel: threads, mutexes, events, memory</li>
+        <li>37 system modules load, missing functions get stubbed and logged</li>
+        <li>audio out</li>
+      </ul>
+    </div>
+    <div class="rel">
+      <div class="rel-head">v0.2.0 <span class="date">sep 13 2026</span></div>
+      <ul>
+        <li>elf / self loader</li>
+        <li>native x86-64 execution, syscalls trapped</li>
+        <li>guest threads mapped to host threads</li>
+      </ul>
+    </div>
+    <div class="rel">
+      <div class="rel-head">v0.1.0 <span class="date">aug 23 2026</span></div>
+      <ul>
+        <li>first commit. memory layout, logging, window</li>
+      </ul>
     </div>
   </div>
 
-  <section class="section">
-    <div class="divider reveal">changelog</div>
-    <div id="changelog" class="section" style="margin-top:0"></div>
-  </section>
+  <h2><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01"/></svg>faq</h2>
+  <p><b>can i download it?</b><br>no. if that changes it'll be on github first.</p>
+  <p><b>when?</b><br>no idea. please don't ask for an eta.</p>
+  <p><b>why are contributors hidden?</b><br>some people don't want their names on it. that's up to them.</p>
+  <p><b>do i need a ps5?</b><br>yes. no firmware, keys or games are included, you'd have to dump your own.</p>
 
-  <section class="section">
-    <div class="divider reveal">latest on x</div>
-    <div id="xposts" class="x-posts"></div>
-    <a class="x-follow reveal" id="xfollow" target="_blank" rel="noopener">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.9 2H22l-6.8 7.8L23 22h-6.2l-4.8-6.3L6.4 22H3.3l7.3-8.3L1 2h6.3l4.4 5.8L18.9 2zm-1.1 18h1.7L6.3 3.9H4.5L17.8 20z"/></svg>
-      Follow on X <span id="xhandle"></span>
-    </a>
-  </section>
-</main>
+  <h2><svg class="ic" viewBox="0 0 24 24" fill="currentColor"><path d="M18.9 2H22l-6.8 7.8L23 22h-6.2l-4.8-6.3L6.4 22H3.3l7.3-8.3L1 2h6.3l4.4 5.8L18.9 2zm-1.1 18h1.7L6.3 3.9H4.5L17.8 20z"/></svg>x</h2>
+  <div class="x-posts" id="xposts"></div>
 
+  <footer>
+    not affiliated with sony. no firmware or game files are hosted here.<br>
+    <span id="build"></span>
+  </footer>
+</div>
+
+<button id="musicbtn"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg><span id="mtxt">music: off</span></button>
 
 <!-- Your song: music.mp3 or Music.mp3 both work -->
 <audio id="music" loop preload="auto">
@@ -273,95 +220,36 @@
 </audio>
 
 <script>
-  /* =====================================================
-     CHANGELOG — add new updates at the TOP of this list.
-     Copy one { ... }, block, paste it above the others, change the text.
-     tag is optional (e.g. "new", "fix", "update").
-     ===================================================== */
-  const CHANGELOG = [
-    {
-      title: "Site launched",
-      date: "Nov 22, 2026",
-      tag: "new",
-      items: [
-        "Sata-Emu site is live",
-        "Added status and changelog"
-      ]
-    }
-  ];
-
-  /* =====================================================
-     X / TWITTER
-     X_HANDLE: your @ without the @
-     X_POSTS: paste links to posts you want shown, newest first.
-       Get a link: on the post, click Share > Copy link.
-       Example: "https://x.com/satawired/status/1234567890123456789"
-     ===================================================== */
-  const X_HANDLE = "satawired";
-  const X_POSTS = [
+  // ---- settings ----
+  const STATUS     = "developing";
+  const VERSION    = "v0.4.2-dev";
+  const COMMIT     = "fae13b6";
+  const GITHUB_URL = "https://github.com/Satadv/Satawired-Emu";
+  const X_HANDLE   = "satawired";
+  const X_POSTS = [   // newest first
     "https://x.com/satawired/status/2124634717698015635",
-     "https://x.com/satawired/status/2124387690355515490",
+    "https://x.com/satawired/status/2124387690355515490",
   ];
+  // ------------------
 
-  /* logo: tries each name until one loads */
-  (function () {
-    const tries = ["Logo.png", "logo.jpg", "Logo.jpg",
-      "https://media.discordapp.net/attachments/1573947758342184960/1573947801979592835/3383c8933de00e467128e038d13c07cc.jpg?ex=6b03dc9e&is=6b028b1e&hm=15881ac7bfcac84da665415cccc412315165c05f49c9594904771b786a120586&format=webp"];
-    const img = document.getElementById("logo");
+  const $ = id => document.getElementById(id);
+  $("status").textContent = STATUS;
+  $("ver").textContent = VERSION;
+  $("build").textContent = VERSION + " · " + COMMIT;
+  $("ghlink").href = GITHUB_URL;
+  $("rellink").href = GITHUB_URL + "/releases/tag/" + VERSION;
+  $("xlink").href = "https://x.com/" + X_HANDLE;
+
+  $("toggle").onclick = () => { $("older").style.display = "block"; $("toggle").remove(); };
+
+  // logo fallback
+  document.querySelectorAll(".logo-img").forEach(img => {
+    const tries = ["Logo.png", "logo.jpg", "Logo.jpg"];
     img.onerror = () => { if (tries.length) img.src = tries.shift(); else img.onerror = null; };
     if (img.complete && img.naturalWidth === 0) img.onerror();
-  })();
-
-  /* build animated name letters */
-  const nameEl = document.getElementById("name");
-  [...nameEl.dataset.text].forEach((c, i) => {
-    const s = document.createElement("span");
-    s.className = "ch";
-    s.style.setProperty("--i", i);
-    s.textContent = c;
-    nameEl.appendChild(s);
   });
 
-  /* music: browsers only allow sound after a real click, tap or key press,
-     so it tries right away, then again on the very first one of those */
-  const music = document.getElementById("music");
-  music.volume = 0.4;
-  const UNLOCK = ["pointerdown", "pointerup", "touchend", "click", "keydown"];
-  let started = false;
-  function startMusic() {
-    if (started) return;
-    const p = music.play();
-    if (p) p.then(() => {
-      started = true;
-      UNLOCK.forEach(e => removeEventListener(e, startMusic, true));
-    }).catch(() => {});
-  }
-  UNLOCK.forEach(e => addEventListener(e, startMusic, true));
-  startMusic();
-  music.addEventListener("canplay", startMusic, { once: true });
-
-  /* build changelog */
-  const logEl = document.getElementById("changelog");
-  CHANGELOG.forEach(u => {
-    const d = document.createElement("div");
-    d.className = "log reveal";
-    const top = document.createElement("div"); top.className = "log-top";
-    const t = document.createElement("div"); t.className = "log-title";
-    if (u.tag) { const g = document.createElement("span"); g.className = "log-tag"; g.textContent = u.tag; t.appendChild(g); }
-    t.appendChild(document.createTextNode(u.title || ""));
-    const dt = document.createElement("div"); dt.className = "log-date"; dt.textContent = u.date || "";
-    top.append(t, dt);
-    const ul = document.createElement("ul");
-    (u.items || []).forEach(i => { const li = document.createElement("li"); li.textContent = i; ul.appendChild(li); });
-    d.append(top, ul);
-    logEl.appendChild(d);
-  });
-
-  /* build X section */
-  const xf = document.getElementById("xfollow");
-  xf.href = "https://x.com/" + X_HANDLE;
-  document.getElementById("xhandle").textContent = "@" + X_HANDLE;
-  const xp = document.getElementById("xposts");
+  // x posts
   if (X_POSTS.length) {
     X_POSTS.forEach(url => {
       const q = document.createElement("blockquote");
@@ -371,49 +259,35 @@
       q.setAttribute("data-conversation", "none");
       const a = document.createElement("a");
       a.href = url.replace("://x.com/", "://twitter.com/");
-      a.textContent = "View post on X";
+      a.textContent = url;
       q.appendChild(a);
-      xp.appendChild(q);
+      $("xposts").appendChild(q);
     });
-    const sc = document.createElement("script");
-    sc.src = "https://platform.twitter.com/widgets.js"; sc.async = true;
-    document.body.appendChild(sc);
+    const s = document.createElement("script");
+    s.src = "https://platform.twitter.com/widgets.js"; s.async = true;
+    document.body.appendChild(s);
   } else {
-    xp.innerHTML = '<div class="x-empty reveal">no posts added yet</div>';
+    $("xposts").innerHTML = '<p class="muted">nothing yet</p>';
   }
 
-  /* fade sections in as you scroll */
-  const io = new IntersectionObserver(es => es.forEach(e => {
-    if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
-  }), { threshold: 0.15 });
-  document.querySelectorAll(".reveal").forEach(el => io.observe(el));
-
-  /* floating particles */
-  const cv = document.getElementById("particles");
-  const ctx = cv.getContext("2d");
-  let W, H, pts = [];
-  function resize() {
-    W = cv.width = innerWidth; H = cv.height = innerHeight;
-    pts = Array.from({ length: Math.min(90, Math.floor(W * H / 14000)) }, () => ({
-      x: Math.random() * W, y: Math.random() * H,
-      r: Math.random() * 1.6 + .3,
-      vx: (Math.random() - .5) * .25, vy: -Math.random() * .4 - .1,
-      a: Math.random() * .6 + .2
-    }));
+  // music (browsers only allow it after a click/key press)
+  const music = $("music"), btn = $("musicbtn");
+  music.volume = 0.35;
+  let off = false;
+  const setBtn = () => $("mtxt").textContent = music.paused ? "music: off" : "music: on";
+  function tryStart(e) {
+    if (off || (e && btn.contains(e.target))) return;
+    music.play().then(() => {
+      setBtn();
+      ["pointerdown", "keydown"].forEach(t => removeEventListener(t, tryStart, true));
+    }).catch(() => {});
   }
-  function draw() {
-    ctx.clearRect(0, 0, W, H);
-    for (const p of pts) {
-      p.x += p.vx; p.y += p.vy;
-      if (p.y < -5) { p.y = H + 5; p.x = Math.random() * W; }
-      if (p.x < -5) p.x = W + 5; if (p.x > W + 5) p.x = -5;
-      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(170,160,255,${p.a})`; ctx.fill();
-    }
-    requestAnimationFrame(draw);
-  }
-  addEventListener("resize", resize);
-  resize(); draw();
+  ["pointerdown", "keydown"].forEach(t => addEventListener(t, tryStart, true));
+  tryStart();
+  btn.onclick = () => {
+    if (music.paused) { off = false; music.play().then(setBtn).catch(() => {}); }
+    else { off = true; music.pause(); setBtn(); }
+  };
 </script>
 </body>
 </html>
