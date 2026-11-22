@@ -32,6 +32,7 @@
     justify-content: center;
   }
 
+  /* ---------- background layers ---------- */
   #particles { position: fixed; inset: 0; z-index: 0; }
   .scanlines {
     position: fixed; inset: 0; z-index: 1; pointer-events: none;
@@ -54,6 +55,7 @@
     100% { transform: translate(30%, 20%); }
   }
 
+  /* ---------- main card ---------- */
   main {
     position: relative; z-index: 2;
     display: flex; flex-direction: column; align-items: center; gap: 26px;
@@ -92,6 +94,7 @@
     object-fit: cover; border: 3px solid var(--bg); background: #111;
   }
 
+  /* ---------- animated name ---------- */
   .name {
     font-family: "Anton", sans-serif;
     font-size: clamp(38px, 11vw, 56px);
@@ -118,6 +121,7 @@
   }
   @keyframes wave { 0%, 100% { translate: 0 0; } 50% { translate: 0 -5px; } }
 
+  /* glitch layers */
   .name::before, .name::after {
     content: attr(data-text);
     position: absolute; inset: 0;
@@ -141,6 +145,7 @@
     96% { opacity: 0; }
   }
 
+  /* ---------- status ---------- */
   .status {
     width: 100%;
     display: flex; align-items: center; gap: 12px;
@@ -184,8 +189,8 @@
 <main id="main" class="show">
   <div class="header">
     <div class="logo-wrap">
-      <img src="logo.png" alt="Sata-Emu logo"
-           onerror="if(!this.dataset.tried){this.dataset.tried=1;this.src='logo.jpg';}else{this.onerror=null;this.src='https://media.discordapp.net/attachments/1573947758342184960/1573947801979592835/3383c8933de00e467128e038d13c07cc.jpg?ex=6b03dc9e&is=6b028b1e&hm=15881ac7bfcac84da665415cccc412315165c05f49c9594904771b786a120586&format=webp';}">
+      <!-- Put your logo in the repo as logo.png or logo.jpg. The Discord link is only a backup: Discord links expire after a while. -->
+      <img id="logo" src="logo.png" alt="Sata-Emu logo">
     </div>
     <h1 class="name" id="name" data-text="SATA-EMU"></h1>
   </div>
@@ -201,9 +206,23 @@
   </div>
 </main>
 
-<audio id="music" src="music.mp3" loop preload="auto"></audio>
+<!-- Your song: music.mp3 or Music.mp3 both work -->
+<audio id="music" loop preload="auto">
+  <source src="Music.mp3" type="audio/mpeg">
+  <source src="music.mp3" type="audio/mpeg">
+</audio>
 
 <script>
+  /* logo: tries each name until one loads */
+  (function () {
+    const tries = ["Logo.png", "logo.jpg", "Logo.jpg",
+      "https://media.discordapp.net/attachments/1573947758342184960/1573947801979592835/3383c8933de00e467128e038d13c07cc.jpg?ex=6b03dc9e&is=6b028b1e&hm=15881ac7bfcac84da665415cccc412315165c05f49c9594904771b786a120586&format=webp"];
+    const img = document.getElementById("logo");
+    img.onerror = () => { if (tries.length) img.src = tries.shift(); else img.onerror = null; };
+    if (img.complete && img.naturalWidth === 0) img.onerror();
+  })();
+
+  /* build animated name letters */
   const nameEl = document.getElementById("name");
   [...nameEl.dataset.text].forEach((c, i) => {
     const s = document.createElement("span");
@@ -213,6 +232,8 @@
     nameEl.appendChild(s);
   });
 
+  /* music: starts right away if the browser allows it,
+     otherwise it starts the first time the visitor clicks, taps, scrolls or presses a key */
   const music = document.getElementById("music");
   music.volume = 0.4;
   function startMusic() {
@@ -223,6 +244,7 @@
   ["click", "touchstart", "keydown", "scroll", "mousemove"].forEach(e => addEventListener(e, startMusic));
   startMusic();
 
+  /* floating particles */
   const cv = document.getElementById("particles");
   const ctx = cv.getContext("2d");
   let W, H, pts = [];
