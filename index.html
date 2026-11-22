@@ -21,16 +21,17 @@
     --online: #3ddc84;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body { height: 100%; }
+  html { scroll-behavior: smooth; }
   body {
     background: var(--bg);
     color: var(--text);
     font-family: "JetBrains Mono", monospace;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    overflow-x: hidden;
+    min-height: 100vh;
   }
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: #0b0b0c; }
+  ::-webkit-scrollbar-thumb { background: #2a2a30; border-radius: 4px; }
 
   /* ---------- background layers ---------- */
   #particles { position: fixed; inset: 0; z-index: 0; }
@@ -59,7 +60,9 @@
   main {
     position: relative; z-index: 2;
     display: flex; flex-direction: column; align-items: center; gap: 26px;
-    width: min(380px, 90vw);
+    width: min(440px, 90vw);
+    margin: 0 auto;
+    padding: calc(50vh - 130px) 0 90px;
     opacity: 0;
   }
   main.show { animation: rise 1s cubic-bezier(.2,.8,.2,1) forwards; }
@@ -174,6 +177,48 @@
   main.show .divider { animation: fadeUp .7s ease forwards 1.4s; }
   .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: var(--border); }
 
+  /* ---------- sections that appear on scroll ---------- */
+  .section { width: 100%; display: flex; flex-direction: column; gap: 14px; margin-top: 8px; }
+  .reveal { opacity: 0; transform: translateY(24px); transition: opacity .7s ease, transform .7s cubic-bezier(.2,.8,.2,1); }
+  .reveal.in { opacity: 1; transform: none; }
+  .section .divider { animation: none !important; }
+
+  /* ---------- changelog ---------- */
+  .log {
+    background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+    padding: 16px 18px; backdrop-filter: blur(8px);
+    position: relative;
+  }
+  .log::before {
+    content: ""; position: absolute; left: 0; top: 14px; bottom: 14px; width: 2px;
+    background: linear-gradient(var(--accent), var(--accent2)); border-radius: 2px;
+  }
+  .log-top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 8px; }
+  .log-title { font-size: 13px; font-weight: 700; letter-spacing: 1px; }
+  .log-date { font-size: 10px; color: var(--muted); letter-spacing: 1px; white-space: nowrap; }
+  .log-tag {
+    display: inline-block; font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+    padding: 2px 6px; border-radius: 4px; margin-right: 8px;
+    background: rgba(143,123,255,.15); color: #b9adff; vertical-align: 1px;
+  }
+  .log ul { list-style: none; display: flex; flex-direction: column; gap: 5px; }
+  .log li { font-size: 12px; color: #c9c9cf; line-height: 1.5; padding-left: 16px; position: relative; }
+  .log li::before { content: "›"; position: absolute; left: 2px; color: var(--accent); }
+
+  /* ---------- X posts ---------- */
+  .x-follow {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    padding: 14px; border-radius: 10px; text-decoration: none; color: var(--text);
+    background: var(--card); border: 1px solid var(--border); backdrop-filter: blur(8px);
+    font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+    transition: border-color .25s ease, transform .25s ease, background .25s ease;
+  }
+  .x-follow:hover { border-color: rgba(255,255,255,.25); transform: translateY(-2px); background: rgba(30,30,34,.85); }
+  .x-follow span { color: var(--muted); font-weight: 400; text-transform: none; letter-spacing: 1px; }
+  .x-posts { display: flex; flex-direction: column; gap: 4px; }
+  .x-posts .twitter-tweet { margin: 0 auto !important; }
+  .x-empty { font-size: 11px; color: var(--muted); text-align: center; padding: 6px 0; }
+
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
   }
@@ -204,7 +249,22 @@
       <div class="status-text"><span id="status">Developing</span></div>
     </div>
   </div>
+
+  <section class="section">
+    <div class="divider reveal">changelog</div>
+    <div id="changelog" class="section" style="margin-top:0"></div>
+  </section>
+
+  <section class="section">
+    <div class="divider reveal">latest on x</div>
+    <div id="xposts" class="x-posts"></div>
+    <a class="x-follow reveal" id="xfollow" target="_blank" rel="noopener">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.9 2H22l-6.8 7.8L23 22h-6.2l-4.8-6.3L6.4 22H3.3l7.3-8.3L1 2h6.3l4.4 5.8L18.9 2zm-1.1 18h1.7L6.3 3.9H4.5L17.8 20z"/></svg>
+      Follow on X <span id="xhandle"></span>
+    </a>
+  </section>
 </main>
+
 
 <!-- Your song: music.mp3 or Music.mp3 both work -->
 <audio id="music" loop preload="auto">
@@ -213,6 +273,35 @@
 </audio>
 
 <script>
+  /* =====================================================
+     CHANGELOG — add new updates at the TOP of this list.
+     Copy one { ... }, block, paste it above the others, change the text.
+     tag is optional (e.g. "new", "fix", "update").
+     ===================================================== */
+  const CHANGELOG = [
+    {
+      title: "Site launched",
+      date: "Nov 22, 2026",
+      tag: "new",
+      items: [
+        "Sata-Emu site is live",
+        "Added status and changelog"
+      ]
+    }
+  ];
+
+  /* =====================================================
+     X / TWITTER
+     X_HANDLE: your @ without the @
+     X_POSTS: paste links to posts you want shown, newest first.
+       Get a link: on the post, click Share > Copy link.
+       Example: "https://x.com/satawired/status/1234567890123456789"
+     ===================================================== */
+  const X_HANDLE = "satawired";
+  const X_POSTS = [
+     "https://x.com/satawired/status/2124387690355515490",
+  ];
+
   /* logo: tries each name until one loads */
   (function () {
     const tries = ["Logo.png", "logo.jpg", "Logo.jpg",
@@ -249,6 +338,54 @@
   UNLOCK.forEach(e => addEventListener(e, startMusic, true));
   startMusic();
   music.addEventListener("canplay", startMusic, { once: true });
+
+  /* build changelog */
+  const logEl = document.getElementById("changelog");
+  CHANGELOG.forEach(u => {
+    const d = document.createElement("div");
+    d.className = "log reveal";
+    const top = document.createElement("div"); top.className = "log-top";
+    const t = document.createElement("div"); t.className = "log-title";
+    if (u.tag) { const g = document.createElement("span"); g.className = "log-tag"; g.textContent = u.tag; t.appendChild(g); }
+    t.appendChild(document.createTextNode(u.title || ""));
+    const dt = document.createElement("div"); dt.className = "log-date"; dt.textContent = u.date || "";
+    top.append(t, dt);
+    const ul = document.createElement("ul");
+    (u.items || []).forEach(i => { const li = document.createElement("li"); li.textContent = i; ul.appendChild(li); });
+    d.append(top, ul);
+    logEl.appendChild(d);
+  });
+
+  /* build X section */
+  const xf = document.getElementById("xfollow");
+  xf.href = "https://x.com/" + X_HANDLE;
+  document.getElementById("xhandle").textContent = "@" + X_HANDLE;
+  const xp = document.getElementById("xposts");
+  if (X_POSTS.length) {
+    X_POSTS.forEach(url => {
+      const q = document.createElement("blockquote");
+      q.className = "twitter-tweet";
+      q.setAttribute("data-theme", "dark");
+      q.setAttribute("data-dnt", "true");
+      q.setAttribute("data-conversation", "none");
+      const a = document.createElement("a");
+      a.href = url.replace("://x.com/", "://twitter.com/");
+      a.textContent = "View post on X";
+      q.appendChild(a);
+      xp.appendChild(q);
+    });
+    const sc = document.createElement("script");
+    sc.src = "https://platform.twitter.com/widgets.js"; sc.async = true;
+    document.body.appendChild(sc);
+  } else {
+    xp.innerHTML = '<div class="x-empty reveal">no posts added yet</div>';
+  }
+
+  /* fade sections in as you scroll */
+  const io = new IntersectionObserver(es => es.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
+  }), { threshold: 0.15 });
+  document.querySelectorAll(".reveal").forEach(el => io.observe(el));
 
   /* floating particles */
   const cv = document.getElementById("particles");
