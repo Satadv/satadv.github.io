@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sata-Emu</title>
 <link rel="icon" href="logo.png">
+<link rel="icon" href="logo.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -117,7 +118,6 @@
   }
   @keyframes wave { 0%, 100% { translate: 0 0; } 50% { translate: 0 -5px; } }
 
-  /* glitch layers */
   .name::before, .name::after {
     content: attr(data-text);
     position: absolute; inset: 0;
@@ -185,7 +185,7 @@
   <div class="header">
     <div class="logo-wrap">
       <img src="logo.png" alt="Sata-Emu logo"
-           onerror="this.onerror=null;this.src='https://media.discordapp.net/attachments/1573947758342184960/1573947801979592835/3383c8933de00e467128e038d13c07cc.jpg?ex=6b03dc9e&is=6b028b1e&hm=15881ac7bfcac84da665415cccc412315165c05f49c9594904771b786a120586&format=webp'">
+           onerror="if(!this.dataset.tried){this.dataset.tried=1;this.src='logo.jpg';}else{this.onerror=null;this.src='https://media.discordapp.net/attachments/1573947758342184960/1573947801979592835/3383c8933de00e467128e038d13c07cc.jpg?ex=6b03dc9e&is=6b028b1e&hm=15881ac7bfcac84da665415cccc412315165c05f49c9594904771b786a120586&format=webp';}">
     </div>
     <h1 class="name" id="name" data-text="SATA-EMU"></h1>
   </div>
