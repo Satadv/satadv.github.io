@@ -71,18 +71,63 @@
   .rel ul { margin: 6px 0; padding-left: 18px; }
   .rel li { margin: 2px 0; }
   .rel .sub { color: #888; margin-top: 8px; }
-  #older { display: none; }
   .toggle { background: none; border: 0; color: #9d8cff; font: inherit; cursor: pointer; padding: 0; text-decoration: underline; }
 
   .x-posts .twitter-tweet { margin: 10px 0 !important; }
 
   footer { margin-top: 50px; font-size: 12px; color: #555; }
 
+  /* ---------- animation ---------- */
+  #dust { position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: .5; }
+  .wrap > header, .status, .warn { opacity: 0; animation: up .6s cubic-bezier(.2,.8,.2,1) forwards; }
+  .status { animation-delay: .15s; }
+  .warn { animation-delay: .3s; }
+  @keyframes up { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+  header img { transition: transform .3s ease; }
+  header img:hover { transform: rotate(-6deg) scale(1.06); }
+
+  .status .dot { position: relative; }
+  .status .dot::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: #3ddc84; animation: ping 1.8s ease-out infinite; }
+  @keyframes ping { from { transform: scale(1); opacity: .7; } to { transform: scale(2.6); opacity: 0; } }
+
+  h2 { position: relative; border-bottom-color: transparent; }
+  h2::after { content: ""; position: absolute; left: 0; bottom: -1px; height: 1px; width: 0; background: linear-gradient(90deg, #9d8cff, #222 60%); transition: width .9s cubic-bezier(.2,.8,.2,1); }
+  h2.in::after { width: 100%; }
+
+  .fx { opacity: 0; transform: translateY(12px); transition: opacity .5s ease, transform .5s cubic-bezier(.2,.8,.2,1); }
+  .fx.in { opacity: 1; transform: none; }
+  .rel li { opacity: 0; transform: translateX(-6px); transition: opacity .35s ease, transform .35s ease; transition-delay: calc(var(--i, 0) * 40ms); }
+  .rel.in li { opacity: 1; transform: none; }
+
+  tr { transition: background .2s; }
+  tbody tr:hover, tr:not(:first-child):hover { background: #141417; }
+
+  .stack span { transition: border-color .2s, transform .2s; }
+  .stack span:hover { border-color: #3a3a40; transform: translateY(-2px); }
+
+  .links a { transition: border-color .2s, color .2s, transform .2s; }
+  .links a:hover { transform: translateY(-1px); }
+  #rellink .ic { transition: transform .2s; }
+  #rellink:hover .ic { transform: translate(2px, -2px); }
+
+  #older { display: block; max-height: 0; overflow: hidden; transition: max-height .7s ease; }
+  #older.open { max-height: 2000px; }
+
+  #musicbtn.on .ic { animation: bob 1s ease-in-out infinite; color: #9d8cff; }
+  @keyframes bob { 50% { transform: translateY(-2px) rotate(-8deg); } }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+    .fx, .rel li, .wrap > header, .status, .warn { opacity: 1 !important; transform: none !important; }
+  }
+
   #musicbtn { position: fixed; right: 14px; bottom: 14px; background: #19191c; color: #888; border: 1px solid #2a2a2e; border-radius: 4px; font: 12px "JetBrains Mono", monospace; padding: 4px 8px; cursor: pointer; }
   #musicbtn:hover { color: #ddd; }
 </style>
 </head>
 <body>
+<canvas id="dust"></canvas>
 <div class="wrap">
 
   <header>
@@ -240,7 +285,43 @@
   $("rellink").href = GITHUB_URL + "/releases/tag/" + VERSION;
   $("xlink").href = "https://x.com/" + X_HANDLE;
 
-  $("toggle").onclick = () => { $("older").style.display = "block"; $("toggle").remove(); };
+  $("toggle").onclick = () => {
+    $("older").classList.add("open");
+    $("older").querySelectorAll(".rel").forEach(e => io.observe(e));
+    $("toggle").remove();
+  };
+
+  // fade things in as you scroll
+  document.querySelectorAll(".wrap > h2, .wrap > p, .stack, .table-wrap, .rel, .x-posts, footer, #toggle")
+    .forEach(e => { if (!e.closest("#older")) e.classList.add("fx"); });
+  document.querySelectorAll("#older .rel").forEach(e => e.classList.add("fx"));
+  document.querySelectorAll(".rel").forEach(rel => rel.querySelectorAll("li").forEach((li, i) => li.style.setProperty("--i", i)));
+  const io = new IntersectionObserver(es => es.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
+  }), { threshold: 0.1 });
+  document.querySelectorAll(".fx, h2").forEach(e => { if (!e.closest("#older")) io.observe(e); });
+
+  // background dust
+  const cv = $("dust"), ctx = cv.getContext("2d");
+  let W, H, pts = [];
+  function resize() {
+    W = cv.width = innerWidth; H = cv.height = innerHeight;
+    pts = Array.from({ length: Math.min(50, Math.floor(W * H / 25000)) }, () => ({
+      x: Math.random() * W, y: Math.random() * H, r: Math.random() * 1.2 + .3,
+      vy: -Math.random() * .25 - .05, vx: (Math.random() - .5) * .15, a: Math.random() * .4 + .1,
+    }));
+  }
+  (function draw() {
+    ctx.clearRect(0, 0, W, H);
+    for (const p of pts) {
+      p.x += p.vx; p.y += p.vy;
+      if (p.y < -4) { p.y = H + 4; p.x = Math.random() * W; }
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, 6.283);
+      ctx.fillStyle = `rgba(157,140,255,${p.a})`; ctx.fill();
+    }
+    requestAnimationFrame(draw);
+  })();
+  addEventListener("resize", resize); resize();
 
   // logo fallback
   document.querySelectorAll(".logo-img").forEach(img => {
@@ -274,7 +355,7 @@
   const music = $("music"), btn = $("musicbtn");
   music.volume = 0.35;
   let off = false;
-  const setBtn = () => $("mtxt").textContent = music.paused ? "music: off" : "music: on";
+  const setBtn = () => { $("mtxt").textContent = music.paused ? "music: off" : "music: on"; btn.classList.toggle("on", !music.paused); };
   function tryStart(e) {
     if (off || (e && btn.contains(e.target))) return;
     music.play().then(() => {
